@@ -10,7 +10,7 @@ pub struct Initialize<'info> {
         seeds=[b"config".as_ref()],
         payer=owner,
         bump,
-        space=8+32
+        space=8+32+32
     )]
     pub config: Account<'info, Config>,
     #[account(mut)]
@@ -50,7 +50,8 @@ pub struct SendMsg<'info>{
             b"Bridge".as_ref()
         ],
         bump,
-        seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
+        seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap(),
+        mut
     )]
     /// CHECK: If someone passes in the wrong account, Guardians won't read the message
     pub wormhole_config: AccountInfo<'info>,
@@ -59,7 +60,8 @@ pub struct SendMsg<'info>{
             b"fee_collector".as_ref()
         ],
         bump,
-        seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
+        seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap(),
+        mut
     )]
     /// CHECK: If someone passes in the wrong account, Guardians won't read the message
     pub wormhole_fee_collector: AccountInfo<'info>,
@@ -68,20 +70,22 @@ pub struct SendMsg<'info>{
             b"emitter".as_ref(),
         ],
         bump,
-        seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
+        mut
     )]
     /// CHECK: If someone passes in the wrong account, Guardians won't read the message
     pub wormhole_derived_emitter: AccountInfo<'info>,
     #[account(
         seeds = [
-            b"sequence".as_ref(),
+            b"Sequence".as_ref(),
             wormhole_derived_emitter.key().to_bytes().as_ref()
         ],
         bump,
-        seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
+        seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap(),
+        mut
     )]
     /// CHECK: If someone passes in the wrong account, Guardians won't read the message
     pub wormhole_sequence: AccountInfo<'info>,
+    #[account(mut)]
     pub wormhole_message_key: Signer<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,

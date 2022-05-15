@@ -5,7 +5,9 @@
     },
     "dependencies": {
         "@improbable-eng/grpc-web-node-http-transport": "^0.15.0",
-        "@project-serum/anchor": "^0.24.2"
+        "@project-serum/anchor": "^0.24.2",
+        "ethers": "^5.6.6",
+        "node-fetch": "^2.6.7"
     },
     "devDependencies": {
         "@certusone/wormhole-sdk": "^0.3.1",

@@ -20,7 +20,7 @@ async function main() {
     const messenger = await Messenger.deploy();
     await messenger.deployed();
     console.log("Messenger deployed to address: ", messenger.address);
-    fs.writeFileSync("../../eth-address.txt", messenger.address);
+    fs.writeFileSync("eth-address.txt", messenger.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

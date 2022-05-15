@@ -39,6 +39,13 @@ const config: HardhatUserConfig = {
                     "myth like bonus scare over problem client lizard pioneer submit female collect",
             },
         },
+        tilt: {
+            url: "http://54.144.111.92:8545",
+            accounts: {
+                mnemonic:
+                    "myth like bonus scare over problem client lizard pioneer submit female collect",
+            },
+        },
     },
     gasReporter: {
         enabled: process.env.REPORT_GAS !== undefined,
