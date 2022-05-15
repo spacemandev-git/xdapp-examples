@@ -3,6 +3,7 @@
 cd evm-project && npx hardhat run --network localhost scripts/deploy.ts & cd ../
 # Copy Solana Project and Key into the container and deploy solana
 cd solana-project & anchor build
+minikube kubectl exec -c wormhole solana-devnet-0 -- solana airdrop 1000 7Tn83bS6TJquiCz9pXsCnYZpZmqPQrTjyeksPmJgURoS
 minikube kubectl cp -c wormhole target/deploy/solana_project.so solana-devnet-0:/usr/src/
 minikube kubectl cp -c wormhole solana_project-keypair.json solana-devnet-0:/usr/src/
 minikube kubectl cp -c wormhole test_keypair.json solana-devnet-0:/usr/src/
