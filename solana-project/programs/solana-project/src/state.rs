@@ -2,8 +2,9 @@ use anchor_lang::prelude::*;
 
 #[account]
 #[derive(Default)]
-pub struct OwnerAccount{
-    pub owner: Pubkey
+pub struct Config{
+    pub owner: Pubkey,
+    pub nonce: u32,
 }
 
 #[account]

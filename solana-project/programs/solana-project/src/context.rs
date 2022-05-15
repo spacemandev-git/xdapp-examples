@@ -4,15 +4,15 @@ use crate::state::*;
 use std::str::FromStr;
 use anchor_lang::solana_program::sysvar::{rent, clock};
 #[derive(Accounts)]
-pub struct SetOwner<'info> {
+pub struct Initialize<'info> {
     #[account(
         init,
-        seeds=[b"owner".as_ref()],
+        seeds=[b"config".as_ref()],
         payer=owner,
         bump,
         space=8+32
     )]
-    pub owner_acc: Account<'info, OwnerAccount>,
+    pub config: Account<'info, Config>,
     #[account(mut)]
     pub owner: Signer<'info>,
     pub system_program: Program<'info, System>
@@ -27,7 +27,7 @@ pub struct RegisterChain<'info> {
     #[account(
         constraint = owner_acc.owner == owner.key()
     )]
-    pub owner_acc: Account<'info, OwnerAccount>,
+    pub owner_acc: Account<'info, Config>,
     #[account(
         init,
         seeds=[b"EmitterAddress".as_ref(), _chain_id.to_be_bytes().as_ref()],
@@ -43,6 +43,7 @@ pub struct SendMsg<'info>{
     #[account(
         constraint = core_bridge.key() == Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
     )]
+    /// CHECK: If someone passes in the wrong account, Guardians won't read the message
     pub core_bridge: AccountInfo<'info>,
     #[account(
         seeds = [
@@ -51,6 +52,7 @@ pub struct SendMsg<'info>{
         bump,
         seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
     )]
+    /// CHECK: If someone passes in the wrong account, Guardians won't read the message
     pub wormhole_config: AccountInfo<'info>,
     #[account(
         seeds = [
@@ -59,6 +61,7 @@ pub struct SendMsg<'info>{
         bump,
         seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
     )]
+    /// CHECK: If someone passes in the wrong account, Guardians won't read the message
     pub wormhole_fee_collector: AccountInfo<'info>,
     #[account(
         seeds = [
@@ -67,6 +70,7 @@ pub struct SendMsg<'info>{
         bump,
         seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
     )]
+    /// CHECK: If someone passes in the wrong account, Guardians won't read the message
     pub wormhole_derived_emitter: AccountInfo<'info>,
     #[account(
         seeds = [
@@ -76,22 +80,24 @@ pub struct SendMsg<'info>{
         bump,
         seeds::program = Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
     )]
+    /// CHECK: If someone passes in the wrong account, Guardians won't read the message
     pub wormhole_sequence: AccountInfo<'info>,
-
-    //TODO: FIGURE OUT WHAT THIS IS USED FOR
     pub wormhole_message_key: Signer<'info>,
-
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
     #[account(
         constraint = clock.key() == clock::id()
     )]
+    /// CHECK: The account constraint will make sure it's the right clock var
     pub clock: AccountInfo<'info>,
     #[account(
         constraint = rent.key() == rent::id()
     )]
-    pub rent: AccountInfo<'info>
+    /// CHECK: The account constraint will make sure it's the right rent var
+    pub rent: AccountInfo<'info>,
+    #[account(mut)]
+    pub config: Account<'info, Config>,
 }
 
 #[derive(Accounts)]

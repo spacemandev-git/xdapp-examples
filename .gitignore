@@ -1,2 +1,4 @@
 .DS_Store
 wormhole/
+hardhat-project/
+node_modules

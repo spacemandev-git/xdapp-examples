@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "../node_modules/hardhat/console.sol";
 import "./Wormhole/IWormhole.sol";
 
 contract Messenger {
@@ -22,7 +21,7 @@ contract Messenger {
         nonce = nonce+1;
     }
 
-    function recieveEncodedMsg(bytes memory encodedMsg, uint32) public {
+    function recieveEncodedMsg(bytes memory encodedMsg) public {
         (IWormhole.VM memory vm, bool valid, string memory reason) = core_bridge.parseAndVerifyVM(encodedMsg);
         
         //1. Check Wormhole Guardian Signatures

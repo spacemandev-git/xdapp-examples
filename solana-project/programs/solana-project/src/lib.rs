@@ -1,5 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::instruction::Instruction;
+use anchor_lang::solana_program::system_instruction::transfer;
+use anchor_lang::solana_program::borsh::try_from_slice_unchecked;
 mod context;
 mod constants;
 mod state;
@@ -17,8 +19,9 @@ pub mod solana_project {
 
     use super::*;
 
-    pub fn initialize(ctx: Context<SetOwner>) -> Result<()> {
-        ctx.accounts.owner_acc.owner = ctx.accounts.owner.key();
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+        ctx.accounts.config.owner = ctx.accounts.owner.key();
+        ctx.accounts.config.nonce = 1;
         Ok(())
     }
 
@@ -28,6 +31,21 @@ pub mod solana_project {
     }
 
     pub fn send_msg(ctx:Context<SendMsg>, msg:String) -> Result<()> {
+        //Look Up Fee
+        let bridge_data:BridgeData = try_from_slice_unchecked(&ctx.accounts.wormhole_config.data.borrow_mut())?;
+        
+        //Send Fee
+        invoke_signed(
+            &transfer(
+                &ctx.accounts.payer.key(),
+                &ctx.accounts.wormhole_fee_collector.key(),
+                bridge_data.config.fee
+            ),
+            &[],
+            &[]
+        )?;
+
+        //Send Post Msg Tx
         let sendmsg_ix = Instruction {
             program_id: ctx.accounts.core_bridge.key(),
             accounts: vec![
@@ -45,7 +63,7 @@ pub mod solana_project {
             data: (
                 wormhole::Instruction::PostMessage,
                 PostMessageData {
-                    nonce: 1,
+                    nonce: ctx.accounts.config.nonce,
                     payload: msg.as_bytes().try_to_vec()?,
                     consistency_level: wormhole::ConsistencyLevel::Confirmed,
                 },
@@ -85,10 +103,12 @@ pub mod solana_project {
                 ],
             ]
         )?;
+
+        ctx.accounts.config.nonce += 1;
         Ok(())
     }
 
-    pub fn recieve_msg(ctx:Context<RecieveMsg>) -> Result<()> {
+    pub fn recieve_msg(_ctx:Context<RecieveMsg>) -> Result<()> {
         Ok(())
     }
 }
