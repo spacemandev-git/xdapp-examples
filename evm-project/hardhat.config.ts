@@ -40,7 +40,7 @@ const config: HardhatUserConfig = {
             },
         },
         tilt: {
-            url: "http://54.144.111.92:8545",
+            url: "http://34.235.126.200:8545",
             accounts: {
                 mnemonic:
                     "myth like bonus scare over problem client lizard pioneer submit female collect",

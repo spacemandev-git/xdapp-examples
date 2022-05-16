@@ -15,7 +15,7 @@ import {
 async function main(){
     setDefaultWasm("node");
     const KEYPAIR = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync("test_keypair.json").toString()))); //7Tn83bS6TJquiCz9pXsCnYZpZmqPQrTjyeksPmJgURoS
-    const CONN_STRING = "http://54.144.111.92:8899";    const CONTRACT_ADDRESS = "AxJUYo5P9SL9f1XHxdqUSaAvGPqSbFNMcgQ9tZENyofB";
+    const CONN_STRING = "http://34.235.126.200:8899";    const CONTRACT_ADDRESS = "AxJUYo5P9SL9f1XHxdqUSaAvGPqSbFNMcgQ9tZENyofB";
     const IDL = JSON.parse(fs.readFileSync('target/idl/solana_project.json').toString());
     const program = new anchor.Program<Messenger>(IDL,CONTRACT_ADDRESS, new anchor.AnchorProvider(new anchor.web3.Connection(CONN_STRING), new NodeWallet(KEYPAIR), {}));
 
@@ -51,7 +51,7 @@ async function main(){
     const emitterAddress = await getEmitterAddressSolana(program.programId.toString());
     console.log("Emitter Addresss: ", emitterAddress);
    
-    const WH_DEVNET_REST = "http://54.144.111.92:7071";
+    const WH_DEVNET_REST = "http://34.235.126.200:7071";
     const vaaBytes = (
         await (
             await fetch(

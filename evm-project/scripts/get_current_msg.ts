@@ -8,7 +8,7 @@ export async function getCurrentMsg() {
     const signer = ethers.Wallet.fromMnemonic(
         "myth like bonus scare over problem client lizard pioneer submit female collect"
     ).connect(
-        new ethers.providers.JsonRpcProvider("http://54.144.111.92:8545")
+        new ethers.providers.JsonRpcProvider("http://34.235.126.200:8545")
     );
     const messengerAddress = fs.readFileSync("eth-address.txt").toString();
 
