@@ -3,6 +3,8 @@ use crate::constants::*;
 use crate::state::*;
 use std::str::FromStr;
 use anchor_lang::solana_program::sysvar::{rent, clock};
+use crate::wormhole::*;
+
 #[derive(Accounts)]
 pub struct Initialize<'info> {
     #[account(
@@ -10,7 +12,7 @@ pub struct Initialize<'info> {
         seeds=[b"config".as_ref()],
         payer=owner,
         bump,
-        space=8+32+32
+        space=8+32+32+1024
     )]
     pub config: Account<'info, Config>,
     #[account(mut)]
@@ -19,23 +21,23 @@ pub struct Initialize<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(_chain_id:u16, emitter_addr:Pubkey)]
+#[instruction(chain_id:u16, emitter_addr:String)]
 pub struct RegisterChain<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
     pub system_program: Program<'info, System>,
     #[account(
-        constraint = owner_acc.owner == owner.key()
+        constraint = config.owner == owner.key()
     )]
-    pub owner_acc: Account<'info, Config>,
+    pub config: Account<'info, Config>,
     #[account(
         init,
-        seeds=[b"EmitterAddress".as_ref(), _chain_id.to_be_bytes().as_ref()],
+        seeds=[b"EmitterAddress".as_ref(), chain_id.to_be_bytes().as_ref()],
         payer=owner,
         bump,
-        space=8+32
+        space=8+32+16
     )]
-    pub emitter_address: Account<'info, EmitterAddrAccount>,
+    pub emitter_acc: Account<'info, EmitterAddrAccount>,
 }
 
 #[derive(Accounts)]
@@ -105,6 +107,39 @@ pub struct SendMsg<'info>{
 }
 
 #[derive(Accounts)]
-pub struct RecieveMsg{
-
+#[instruction()]
+pub struct ConfirmMsg<'info>{
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+    #[account(
+        init,
+        seeds=[
+            Pubkey::from_str(&emitter_acc.emitter_addr[..]).unwrap().key().as_ref(),
+            emitter_acc.chain_id.to_be_bytes().as_ref(),
+            (PostedVAAData::try_from_slice(&core_bridge_vaa.data.borrow())?).sequence.to_be_bytes().as_ref()
+        ],
+        payer=payer,
+        bump,
+        space=8
+    )]
+    pub processed_vaa: Account<'info, ProcessedVAA>,
+    pub emitter_acc: Account<'info, EmitterAddrAccount>,
+    /// This requires some fancy hashing, so confirm it's derived address in the function itself.
+    #[account(
+        constraint = core_bridge_vaa.to_account_info().owner == &Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
+    )]
+    pub core_bridge_vaa: AccountInfo<'info>,
+    #[account(
+        constraint = clock.key() == clock::id()
+    )]
+    /// CHECK: The account constraint will make sure it's the right clock var
+    pub clock: AccountInfo<'info>,
+    #[account(
+        constraint = rent.key() == rent::id()
+    )]
+    /// CHECK: The account constraint will make sure it's the right rent var
+    pub rent: AccountInfo<'info>,
+    #[account(mut)]
+    pub config: Account<'info, Config>,
 }

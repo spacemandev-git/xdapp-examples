@@ -6,7 +6,7 @@ import { Messenger } from "../typechain";
 
 export async function submitVaa() {
     const vaa = fs.readFileSync("../solana-project/vaa.txt").toString();
-    const vaaBytes = Uint8Array.from(atob(vaa), (c) => c.charCodeAt(0));
+    const vaaBytes = Buffer.from(vaa, "base64");
 
     const signer = ethers.Wallet.fromMnemonic(
         "myth like bonus scare over problem client lizard pioneer submit female collect"

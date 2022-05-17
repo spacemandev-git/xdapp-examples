@@ -30,7 +30,7 @@ pub enum Instruction{
     VerifySignatures,
 }
 
-#[derive(AnchorDeserialize, AnchorSerialize)]
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
 pub struct BridgeData {
     /// The current guardian set index, used to decide which signature sets to accept.
     pub guardian_set_index: u32,
@@ -42,7 +42,7 @@ pub struct BridgeData {
     pub config: BridgeConfig,
 }
 
-#[derive(AnchorDeserialize, AnchorSerialize)]
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
 pub struct BridgeConfig {
     /// Period for how long a guardian set is valid after it has been replaced by a new one.  This
     /// guarantees that VAAs issued by that set can still be submitted for a certain period.  In
@@ -51,4 +51,37 @@ pub struct BridgeConfig {
 
     /// Amount of lamports that needs to be paid to the protocol to post a message
     pub fee: u64,
+}
+
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
+pub struct PostedVAAData {
+    /// Header of the posted VAA
+    pub vaa_version: u8,
+
+    /// Level of consistency requested by the emitter
+    pub consistency_level: u8,
+
+    /// Time the vaa was submitted
+    pub vaa_time: u32,
+
+    /// Account where signatures are stored
+    pub vaa_signature_account: Pubkey,
+
+    /// Time the posted message was created
+    pub submission_time: u32,
+
+    /// Unique nonce for this message
+    pub nonce: u32,
+
+    /// Sequence number of this message
+    pub sequence: u64,
+
+    /// Emitter of the message
+    pub emitter_chain: u16,
+
+    /// Emitter of the message
+    pub emitter_address: [u8; 32],
+
+    /// Message payload
+    pub payload: Vec<u8>,
 }
