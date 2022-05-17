@@ -138,7 +138,7 @@ pub mod solana_project {
             return err!(MessengerError::VAAEmitterMismatch)
         }
 
-        //ctx.accounts.config.current_msg = 
+        ctx.accounts.config.current_msg = String::from_utf8(vaa.payload).unwrap();
 
         Ok(())
     }

@@ -15,5 +15,6 @@ pub struct EmitterAddrAccount{
     pub emitter_addr: String
 }
 
+//Empty account, we just need to check that it *exists*
 #[account]
 pub struct ProcessedVAA {}
