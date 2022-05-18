@@ -69,7 +69,8 @@ async function submit_vaa(){
         Buffer.from("PostedVAA"),
         hash
     ], new anchor.web3.PublicKey(SOLANA_CORE_BRIDGE_ADDRESS))[0]
-
+    console.log("Core Bridge VAA Key: ", core_bridge_vaa_key.toString());
+    
     let config_acc = findProgramAddressSync([Buffer.from("config")], program.programId)[0]
 
     //Confirm via Messenger Code

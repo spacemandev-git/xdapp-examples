@@ -59,17 +59,11 @@ async function main(){
     ], new anchor.web3.PublicKey(SOLANA_CORE_BRIDGE_ADDRESS))[0]
     console.log(core_bridge_vaa_key.toString());
 
-    /*
-    program.provider.connection.onLogs("all", (evt) => {
-        console.log(evt);
-    })
-
     await program.methods.debug()
         .accounts({
             coreBridgeVaa: core_bridge_vaa_key
         })
         .rpc();
-    */
 }
 
 main();

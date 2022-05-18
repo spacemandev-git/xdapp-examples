@@ -1,4 +1,8 @@
 use anchor_lang::prelude::*;
+use borsh::{BorshDeserialize, BorshSerialize};
+use std::{
+    io::Write,
+};
 
 #[derive(AnchorDeserialize, AnchorSerialize)]
 pub struct PostMessageData {
@@ -53,20 +57,55 @@ pub struct BridgeConfig {
     pub fee: u64,
 }
 
-#[derive(AnchorDeserialize, AnchorSerialize, Clone, Debug)]
-pub struct PostVAAData {
-    // Header part
-    pub version: u8,
-    pub guardian_set_index: u32,
+#[derive(Debug)]
+#[repr(transparent)]
+pub struct PostedMessageData(pub MessageData);
 
-    // Body part
-    pub timestamp: u32,
-    pub nonce: u32,
-    pub emitter_chain: u16,
-    pub emitter_address: ForeignAddress,
-    pub sequence: u64,
+#[derive(Debug, Default, BorshDeserialize, BorshSerialize)]
+pub struct MessageData {
+    /// Header of the posted VAA
+    pub vaa_version: u8,
+
+    /// Level of consistency requested by the emitter
     pub consistency_level: u8,
+
+    /// Time the vaa was submitted
+    pub vaa_time: u32,
+
+    /// Account where signatures are stored
+    pub vaa_signature_account: Pubkey,
+
+    /// Time the posted message was created
+    pub submission_time: u32,
+
+    /// Unique nonce for this message
+    pub nonce: u32,
+
+    /// Sequence number of this message
+    pub sequence: u64,
+
+    /// Emitter of the message
+    pub emitter_chain: u16,
+
+    /// Emitter of the message
+    pub emitter_address: [u8; 32],
+
+    /// Message payload
     pub payload: Vec<u8>,
 }
 
-pub type ForeignAddress = [u8; 32];
+impl AnchorSerialize for PostedMessageData {
+    fn serialize<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        writer.write(b"msg")?;
+        BorshSerialize::serialize(&self.0, writer)
+    }
+}
+
+impl AnchorDeserialize for PostedMessageData {
+    fn deserialize(buf: &mut &[u8]) -> std::io::Result<Self> {
+        *buf = &buf[3..];
+        Ok(PostedMessageData(
+            <MessageData as BorshDeserialize>::deserialize(buf)?,
+        ))
+    }
+}

@@ -25,7 +25,6 @@ cd solana-project && ts-node ./scripts/send_msg.ts && cd ../
 cd evm-project && ts-node ./scripts/submit_vaa.ts && cd ../
 #Check the Msg on EVM
 cd evm-project && ts-node ./scripts/get_current_msg.ts && cd ../
-
 #Send msg from EVM to Solana
 cd evm-project && ts-node ./scripts/send_msg.ts && cd ../
 #Register EVM Address on Solana

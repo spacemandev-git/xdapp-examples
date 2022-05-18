@@ -4,6 +4,7 @@ use crate::state::*;
 use std::str::FromStr;
 use anchor_lang::solana_program::sysvar::{rent, clock};
 use crate::wormhole::*;
+use hex::decode;
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
@@ -115,9 +116,9 @@ pub struct ConfirmMsg<'info>{
     #[account(
         init,
         seeds=[
-            &emitter_acc.emitter_addr.as_str().as_bytes().as_ref(),
+            &decode(&emitter_acc.emitter_addr.as_str()).unwrap()[..],
             emitter_acc.chain_id.to_be_bytes().as_ref(),
-            (PostVAAData::try_from_slice(&core_bridge_vaa.data.borrow())?).sequence.to_be_bytes().as_ref()
+            (PostedMessageData::try_from_slice(&core_bridge_vaa.data.borrow())?.0).sequence.to_be_bytes().as_ref()
         ],
         payer=payer,
         bump,

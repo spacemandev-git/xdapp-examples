@@ -12,7 +12,7 @@ use std::io::{
     Write,
 };
 use std::str::FromStr;
-
+use hex::decode;
 mod context;
 mod constants;
 mod state;
@@ -114,7 +114,7 @@ pub mod solana_project {
 
     pub fn confirm_msg(ctx:Context<ConfirmMsg>) -> Result<()> {
         //Hash a VAA Extract and derive a VAA Key
-        let vaa = PostVAAData::try_from_slice(&ctx.accounts.core_bridge_vaa.data.borrow())?;
+        let vaa = PostedMessageData::try_from_slice(&ctx.accounts.core_bridge_vaa.data.borrow())?.0;
         let serialized_vaa = serialize_vaa(&vaa);
 
         let mut h = sha3::Keccak256::default();
@@ -133,7 +133,7 @@ pub mod solana_project {
         // Already checked that the SignedVaa is owned by core bridge in account constraint logic
         //Check that the emitter chain and address match up with the vaa
         if vaa.emitter_chain != ctx.accounts.emitter_acc.chain_id ||
-           vaa.emitter_address != ctx.accounts.emitter_acc.emitter_addr.as_bytes() {
+           vaa.emitter_address != &decode(&ctx.accounts.emitter_acc.emitter_addr.as_str()).unwrap()[..] {
             return err!(MessengerError::VAAEmitterMismatch)
         }
 
@@ -143,7 +143,7 @@ pub mod solana_project {
     }
 
     pub fn debug(ctx:Context<Debug>) -> Result<()> {
-        let vaa = PostVAAData::try_from_slice(&ctx.accounts.core_bridge_vaa.data.borrow())?;
+        let vaa = PostedMessageData::try_from_slice(&ctx.accounts.core_bridge_vaa.data.borrow())?.0;
         msg!("{:?}", vaa);
         Ok(())  
     }
@@ -151,9 +151,9 @@ pub mod solana_project {
 
 // Convert a full VAA structure into the serialization of its unique components, this structure is
 // what is hashed and verified by Guardians.
-pub fn serialize_vaa(vaa: &PostVAAData) -> Vec<u8> {
+pub fn serialize_vaa(vaa: &MessageData) -> Vec<u8> {
     let mut v = Cursor::new(Vec::new());
-    v.write_u32::<BigEndian>(vaa.timestamp).unwrap();
+    v.write_u32::<BigEndian>(vaa.vaa_time).unwrap();
     v.write_u32::<BigEndian>(vaa.nonce).unwrap();
     v.write_u16::<BigEndian>(vaa.emitter_chain.clone() as u16).unwrap();
     v.write(&vaa.emitter_address).unwrap();
