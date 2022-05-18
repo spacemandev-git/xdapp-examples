@@ -11,7 +11,7 @@ export async function submitVaa() {
     const signer = ethers.Wallet.fromMnemonic(
         "myth like bonus scare over problem client lizard pioneer submit female collect"
     ).connect(
-        new ethers.providers.JsonRpcProvider("http://34.235.126.200:8545")
+        new ethers.providers.JsonRpcProvider(`${process.env.TILT_RPC_IP}:8545`)
     );
     const messengerAddress = fs.readFileSync("eth-address.txt").toString();
 

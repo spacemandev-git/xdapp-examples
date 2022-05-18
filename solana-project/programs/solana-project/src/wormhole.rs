@@ -53,35 +53,20 @@ pub struct BridgeConfig {
     pub fee: u64,
 }
 
-#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
-pub struct PostedVAAData {
-    /// Header of the posted VAA
-    pub vaa_version: u8,
+#[derive(AnchorDeserialize, AnchorSerialize, Clone, Debug)]
+pub struct PostVAAData {
+    // Header part
+    pub version: u8,
+    pub guardian_set_index: u32,
 
-    /// Level of consistency requested by the emitter
-    pub consistency_level: u8,
-
-    /// Time the vaa was submitted
-    pub vaa_time: u32,
-
-    /// Account where signatures are stored
-    pub vaa_signature_account: Pubkey,
-
-    /// Time the posted message was created
-    pub submission_time: u32,
-
-    /// Unique nonce for this message
+    // Body part
+    pub timestamp: u32,
     pub nonce: u32,
-
-    /// Sequence number of this message
-    pub sequence: u64,
-
-    /// Emitter of the message
     pub emitter_chain: u16,
-
-    /// Emitter of the message
-    pub emitter_address: [u8; 32],
-
-    /// Message payload
+    pub emitter_address: ForeignAddress,
+    pub sequence: u64,
+    pub consistency_level: u8,
     pub payload: Vec<u8>,
 }
+
+pub type ForeignAddress = [u8; 32];

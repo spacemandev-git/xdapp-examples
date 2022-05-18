@@ -35,7 +35,7 @@ pub struct RegisterChain<'info> {
         seeds=[b"EmitterAddress".as_ref(), chain_id.to_be_bytes().as_ref()],
         payer=owner,
         bump,
-        space=8+32+16
+        space=8+2+256
     )]
     pub emitter_acc: Account<'info, EmitterAddrAccount>,
 }
@@ -115,9 +115,9 @@ pub struct ConfirmMsg<'info>{
     #[account(
         init,
         seeds=[
-            Pubkey::from_str(&emitter_acc.emitter_addr[..]).unwrap().key().as_ref(),
+            &emitter_acc.emitter_addr.as_str().as_bytes().as_ref(),
             emitter_acc.chain_id.to_be_bytes().as_ref(),
-            (PostedVAAData::try_from_slice(&core_bridge_vaa.data.borrow())?).sequence.to_be_bytes().as_ref()
+            (PostVAAData::try_from_slice(&core_bridge_vaa.data.borrow())?).sequence.to_be_bytes().as_ref()
         ],
         payer=payer,
         bump,
@@ -129,17 +129,17 @@ pub struct ConfirmMsg<'info>{
     #[account(
         constraint = core_bridge_vaa.to_account_info().owner == &Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
     )]
+    /// CHECK: This account is owned by Core Bridge so we trust it
     pub core_bridge_vaa: AccountInfo<'info>,
-    #[account(
-        constraint = clock.key() == clock::id()
-    )]
-    /// CHECK: The account constraint will make sure it's the right clock var
-    pub clock: AccountInfo<'info>,
-    #[account(
-        constraint = rent.key() == rent::id()
-    )]
-    /// CHECK: The account constraint will make sure it's the right rent var
-    pub rent: AccountInfo<'info>,
     #[account(mut)]
     pub config: Account<'info, Config>,
+}
+
+#[derive(Accounts)]
+pub struct Debug<'info>{
+    #[account(
+        constraint = core_bridge_vaa.to_account_info().owner == &Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap()
+    )]
+    /// CHECK: This account is owned by Core Bridge so we trust it
+    pub core_bridge_vaa: AccountInfo<'info>,
 }

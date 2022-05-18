@@ -6,16 +6,15 @@ import { findProgramAddressSync } from '@project-serum/anchor/dist/cjs/utils/pub
 import * as b from 'byteify';
 
 import {
-    CHAIN_ID_SOLANA,
+    CHAIN_ID_ETH,
     getEmitterAddressEth,
     setDefaultWasm,
-    tryNativeToUint8Array
 } from '@certusone/wormhole-sdk';
 
 async function register_eth_address(){
     setDefaultWasm("node");
     const KEYPAIR = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync("test_keypair.json").toString()))); //7Tn83bS6TJquiCz9pXsCnYZpZmqPQrTjyeksPmJgURoS
-    const CONN_STRING = "http://34.235.126.200:8899";    const CONTRACT_ADDRESS = "AxJUYo5P9SL9f1XHxdqUSaAvGPqSbFNMcgQ9tZENyofB";
+    const CONN_STRING = `${process.env.TILT_RPC_IP}:8899`;    const CONTRACT_ADDRESS = "AxJUYo5P9SL9f1XHxdqUSaAvGPqSbFNMcgQ9tZENyofB";
     const IDL = JSON.parse(fs.readFileSync('target/idl/solana_project.json').toString());
     const program = new anchor.Program<Messenger>(IDL,CONTRACT_ADDRESS, new anchor.AnchorProvider(new anchor.web3.Connection(CONN_STRING), new NodeWallet(KEYPAIR), {}));
 
@@ -23,16 +22,16 @@ async function register_eth_address(){
 
     await program.methods
         .registerChain(
-            CHAIN_ID_SOLANA,
+            CHAIN_ID_ETH,
             ethAddress
         )
         .accounts({
             owner: KEYPAIR.publicKey,
             systemProgram: anchor.web3.SystemProgram.programId,
             config: findProgramAddressSync([Buffer.from("config")], program.programId)[0],
-            emitterAddress: findProgramAddressSync([
+            emitterAcc: findProgramAddressSync([
                 Buffer.from("EmitterAddress"),
-                b.serializeUint16(CHAIN_ID_SOLANA)
+                b.serializeUint16(CHAIN_ID_ETH)
             ], program.programId)[0]
         })
         .rpc();

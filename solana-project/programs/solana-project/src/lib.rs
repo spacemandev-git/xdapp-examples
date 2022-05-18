@@ -114,7 +114,7 @@ pub mod solana_project {
 
     pub fn confirm_msg(ctx:Context<ConfirmMsg>) -> Result<()> {
         //Hash a VAA Extract and derive a VAA Key
-        let vaa = PostedVAAData::try_from_slice(&ctx.accounts.core_bridge_vaa.data.borrow())?;
+        let vaa = PostVAAData::try_from_slice(&ctx.accounts.core_bridge_vaa.data.borrow())?;
         let serialized_vaa = serialize_vaa(&vaa);
 
         let mut h = sha3::Keccak256::default();
@@ -122,7 +122,7 @@ pub mod solana_project {
         let vaa_hash: [u8; 32] = h.finalize().into();
 
         let (vaa_key, _) = Pubkey::find_program_address(&[
-            b"PostedVaa",
+            b"PostedVAA",
             &vaa_hash
         ], &Pubkey::from_str(CORE_BRIDGE_ADDRESS).unwrap());
 
@@ -131,7 +131,6 @@ pub mod solana_project {
         }
 
         // Already checked that the SignedVaa is owned by core bridge in account constraint logic
-
         //Check that the emitter chain and address match up with the vaa
         if vaa.emitter_chain != ctx.accounts.emitter_acc.chain_id ||
            vaa.emitter_address != ctx.accounts.emitter_acc.emitter_addr.as_bytes() {
@@ -142,13 +141,19 @@ pub mod solana_project {
 
         Ok(())
     }
+
+    pub fn debug(ctx:Context<Debug>) -> Result<()> {
+        let vaa = PostVAAData::try_from_slice(&ctx.accounts.core_bridge_vaa.data.borrow())?;
+        msg!("{:?}", vaa);
+        Ok(())  
+    }
 }
 
 // Convert a full VAA structure into the serialization of its unique components, this structure is
 // what is hashed and verified by Guardians.
-pub fn serialize_vaa(vaa: &PostedVAAData) -> Vec<u8> {
+pub fn serialize_vaa(vaa: &PostVAAData) -> Vec<u8> {
     let mut v = Cursor::new(Vec::new());
-    v.write_u32::<BigEndian>(vaa.vaa_time).unwrap();
+    v.write_u32::<BigEndian>(vaa.timestamp).unwrap();
     v.write_u32::<BigEndian>(vaa.nonce).unwrap();
     v.write_u16::<BigEndian>(vaa.emitter_chain.clone() as u16).unwrap();
     v.write(&vaa.emitter_address).unwrap();

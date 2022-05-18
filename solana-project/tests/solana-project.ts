@@ -10,6 +10,5 @@ describe("solana-project", () => {
   const program = anchor.workspace.SolanaProject as Program<SolanaProject>;
 
   it("Is initialized!", async () => {
-    // Add your test here.  
   });
 });

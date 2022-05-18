@@ -13,7 +13,8 @@ import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pub
 import * as b from "byteify";
 import keccak256 from "keccak256";
 
-async function submit_vaa(){
+
+async function main(){
     setDefaultWasm("node");
     const { parse_vaa } = await importCoreWasm();
 
@@ -25,36 +26,23 @@ async function submit_vaa(){
     const CONTRACT_ADDRESS = "AxJUYo5P9SL9f1XHxdqUSaAvGPqSbFNMcgQ9tZENyofB";
     const IDL = JSON.parse(fs.readFileSync('target/idl/solana_project.json').toString());
     const program = new anchor.Program<Messenger>(IDL,CONTRACT_ADDRESS, new anchor.AnchorProvider(new anchor.web3.Connection(CONN_STRING), new NodeWallet(KEYPAIR), {}));
-
-
-    //Submit to Core Bridge
-    await postVaaSolanaWithRetry(
-        new anchor.web3.Connection(CONN_STRING, "confirmed"),
-        async (tx) => {
-            tx.partialSign(KEYPAIR);
-            return tx;
-        },
-        SOLANA_CORE_BRIDGE_ADDRESS,
-        KEYPAIR.publicKey.toString(),
-        vaaBytes,
-        10
-    );
-
+    
     const parsed_vaa = parse_vaa(vaaBytes);
+    console.log(parsed_vaa);
 
     let emitter_address_acc = findProgramAddressSync([
         Buffer.from("EmitterAddress"),
         b.serializeUint16(parsed_vaa.emitter_chain)
     ], program.programId)[0];
-
+    console.log(emitter_address_acc.toString());
+    
     let processed_vaa_key = findProgramAddressSync([
         Buffer.from(getEmitterAddressEth(fs.readFileSync('../evm-project/eth-address.txt').toString()), "hex"),
         b.serializeUint16(parsed_vaa.emitter_chain),
         b.serializeUint64(parsed_vaa.sequence)
     ], program.programId)[0];
+    console.log(processed_vaa_key.toString());
 
-
-    //Create VAA Hash to use in core bridge key
     let buffer_array = []
     buffer_array.push(b.serializeUint32(parsed_vaa.timestamp));
     buffer_array.push(b.serializeUint32(parsed_vaa.nonce));
@@ -69,22 +57,19 @@ async function submit_vaa(){
         Buffer.from("PostedVAA"),
         hash
     ], new anchor.web3.PublicKey(SOLANA_CORE_BRIDGE_ADDRESS))[0]
+    console.log(core_bridge_vaa_key.toString());
 
-    let config_acc = findProgramAddressSync([Buffer.from("config")], program.programId)[0]
+    /*
+    program.provider.connection.onLogs("all", (evt) => {
+        console.log(evt);
+    })
 
-    //Confirm via Messenger Code
-    await program.methods
-        .confirmMsg()
+    await program.methods.debug()
         .accounts({
-            payer: KEYPAIR.publicKey,
-            systemProgram: anchor.web3.SystemProgram.programId,
-            processedVaa: processed_vaa_key,
-            emitterAcc: emitter_address_acc,
-            coreBridgeVaa: core_bridge_vaa_key,
-            config: config_acc            
+            coreBridgeVaa: core_bridge_vaa_key
         })
         .rpc();
-
-    console.log((await program.account.config.fetch(config_acc)).currentMsg);
+    */
 }
-submit_vaa();
+
+main();

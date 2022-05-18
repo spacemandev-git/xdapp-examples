@@ -7,7 +7,7 @@ import { findProgramAddressSync } from '@project-serum/anchor/dist/cjs/utils/pub
 
 async function main(){
     const KEYPAIR = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync("test_keypair.json").toString()))); //7Tn83bS6TJquiCz9pXsCnYZpZmqPQrTjyeksPmJgURoS
-    const CONN_STRING = "http://34.235.126.200:8899";
+    const CONN_STRING = `${process.env.TILT_RPC_IP}:8899`;
     const CONTRACT_ADDRESS = "AxJUYo5P9SL9f1XHxdqUSaAvGPqSbFNMcgQ9tZENyofB";
     const IDL = JSON.parse(fs.readFileSync('target/idl/solana_project.json').toString());
     const program = new anchor.Program<Messenger>(IDL,CONTRACT_ADDRESS, new anchor.AnchorProvider(new anchor.web3.Connection(CONN_STRING), new NodeWallet(KEYPAIR), {}));
